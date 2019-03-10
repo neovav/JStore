@@ -11,6 +11,6 @@ if(typeof(window['jstore'])!='object' || window['jstore']===null)
 3. Loading of the specified code javascript
 window['jstore'].load(name, md5, url);
 
-name - name of the specified javascript code
-md5 - md5 hash of the specified javascript code
-url - URL of location of the javascript source code
+name - name of the specified javascript code;
+md5 - md5 hash of the specified javascript code;
+url - URL of location of the javascript source code;
