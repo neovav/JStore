@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>This is test page for JStore class</title>
+    <script type="application/javascript" src="JStore.class.js"></script>
+    <script type="application/javascript">
+        var name = 'jQuery';
+
+        //localStorage.removeItem(name);
+
+        var md5 = '4f252523d4af0b478c810c2547a63e19';
+
+        if(typeof(window['jstore'])!='object' || window['jstore']===null)
+            window['jstore'] = new JStore();
+
+        window['jstore'].load(name, md5, 'https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js');
+
+        (function($)
+          {
+console.log('Load');
+              $(document).ready(function()
+                 {
+console.log('Ready');
+                     $('#state').append('<span>The library is successfully loaded</span>');
+                 });
+          })(jQuery);
+    </script>
+</head>
+<body>
+    <H1>This is test page for JStore class</H1>
+
+    <h2 id="state"></h2>
+</body>
+</html>
