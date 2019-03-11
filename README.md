@@ -1,5 +1,5 @@
 This class dynamically loads the javascript code from localstorage. 
-This class allows to lower loading from the server. To reduce the overhead costs connected with network more flexibly to keep track of relevance of javascript of the code in a browser cache. Actually it is the operated browser cache, with more intellectual approach.
+My class allows to lower loading from the server, having reduced the overhead costs connected with network. It keeps track of relevance of javascript of the code in a browser cache more flexibly. Actually it is the operated browser cache, with more intellectual approach. Allowing to solve problems on the high-loaded websites connected both with a set of simultaneous connections, and with availability of the code on third-party servers.
 
 Usage:
 1. Loading of this class
