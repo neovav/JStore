@@ -63,7 +63,7 @@ var JStore = function()
       *  @param txt
       */
 
-     var run = function run_js(txt)
+     var run = function(txt)
       {
           var dom = document.createElement("script");
           dom.text = txt;
