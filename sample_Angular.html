@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="todoApp">
+<head>
+    <meta charset="UTF-8">
+    <title>This is test page for JStore class</title>
+    <script type="application/javascript" src="JStore.class.js"></script>
+    <script type="application/javascript">
+
+        //try{localStorage.removeItem('css:todo');}catch(Err){};
+        //try{localStorage.removeItem('js:Angular');}catch(Err){};
+
+        var obj = [
+                    {'name':'css:todo', 'type':'css', 'md5':'a558c455e5d1615a7e457c494f29f77f', 'url':'todo.css'},
+                    {'name':'js:Angular', 'type':'js', 'md5':'21da20ee83a7958c8af0051be0c979f4', 'url':'https://ajax.googleapis.com/ajax/libs/angularjs/1.7.7/angular.min.js'},
+                    {'name':'js:todo', 'type':'js', 'md5':'f5e8c62e2c92032921584285cca17ace', 'url':'todo.js'}
+                  ];
+
+        if(typeof(window['jstore'])!='object' || window['jstore']===null)
+            window['jstore'] = new JStore();
+
+        window['jstore'].load(obj);
+    </script>
+</head>
+<body ng-controller="TodoListController as todoList">
+<div>
+    <div id="header" align="center"><H1>This is test page for JStore class</H1></div>
+    <div style="display: table-row">
+        <div style="display: table-cell; padding: 0 20px 0 0;"></div>
+        <div style="display: table-cell;">
+            <div >
+                <span>{{todoList.remaining()}} of {{todoList.todos.length}} remaining</span>
+                [ <a href="" ng-click="todoList.archive()">archive</a> ]
+                <ul class="unstyled">
+                    <li ng-repeat="todo in todoList.todos">
+                        <label class="checkbox">
+                            <input type="checkbox" ng-model="todo.done">
+                            <span class="done-{{todo.done}}">{{todo.text}}</span>
+                        </label>
+                    </li>
+                </ul>
+                <form ng-submit="todoList.addTodo()">
+                    <input type="text" ng-model="todoList.todoText"  size="30"
+                           placeholder="add new todo here">
+                    <input class="btn-primary" type="submit" value="add">
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="footer" align="center"><h4 id="state"></h4></div>
+</div>
+</body>
+</html>
