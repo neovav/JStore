@@ -1,18 +1,11 @@
+/**
+ * Class for save data to localstorage
+ */
+
 var JStore = function()
  {
      var list = {};
-     var vajax = false;
-
-     try{vajax = new XMLHttpRequest();}
-     catch (e)
-      {
-         try {vajax = new ActiveXObject("Msxml2.XMLHTTP");}
-         catch (e)
-          {
-              try{vajax = new ActiveXObject("Microsoft.XMLHTTP");}
-              catch (e){};
-          };
-      };
+     var parent = this;
 
 
      /**
@@ -49,12 +42,12 @@ var JStore = function()
       */
 
      this.isStorage = function()
-      {
-          var ret = false;
-          try{ret = 'localStorage' in window && window['localStorage'] !== null}
-          catch(err){};
-          return ret;
-      };
+     {
+         var ret = false;
+         try{ret = 'localStorage' in window && window['localStorage'] !== null}
+         catch(err){};
+         return ret;
+     };
 
 
      /**
@@ -63,7 +56,7 @@ var JStore = function()
       *  @param txt
       */
 
-     var run = function(txt)
+     var run_js = function(txt)
       {
           var dom = document.createElement("script");
           dom.text = txt;
@@ -73,73 +66,219 @@ var JStore = function()
 
 
      /**
-      * Load javascript code from url or LocalStorage
+      *  Add style
       *
-      * @param name          Name javascript class
-      * @param url           Url place javascript code
-      * @param md5           md5 javascript code
-      * @param asinc         Asynchronous method
+      *  @param css
+      */
+
+     var add_css = function(css)
+      {
+          var dom = document.createElement("style");
+          dom.type="text/css";
+          if (dom.styleSheet) dom.styleSheet.cssText = css;
+             else dom.appendChild(document.createTextNode(css));
+          document.getElementsByTagName("head")[0].appendChild(dom);
+      };
+
+
+     /**
+      *  Add html
+      *
+      *  @param html
+      *  @param css
+      */
+
+     var add_html = function(html, css)
+      {
+          var tag = document.querySelector(css);
+          tag.innerHTML = html;
+      };
+
+
+     /**
+      * Ajax query to remote server
+      *
+      * @param url              URL - address for web data
+      * @param func             The function run after succesfull response
+      * @param post             Post data for request
+      * @param asinc            Synchronous or asynchronous request
+      */
+
+     this.ajax = function(url, func, post, asinc)
+      {
+          if(typeof(func)!='function') throw 'Callback functions is absent';
+          asinc = typeof asinc !== 'undefined' ? asinc : false;
+
+          var vajax = false;
+
+          try{vajax = new XMLHttpRequest();}
+          catch (e)
+           {
+               try {vajax = new ActiveXObject("Msxml2.XMLHTTP");}
+               catch (e){vajax = new ActiveXObject("Microsoft.XMLHTTP");};
+           };
+
+          if(typeof(vajax)!='object' || vajax===null)
+              throw 'Our browser is not support XMLHttpRequest';
+
+          vajax.onreadystatechange  = function()
+           {
+               if(vajax.readyState != 4) return null;
+               if(vajax.status != 200) throw vajax.responseText;
+
+               var str = vajax.responseText;
+               func(str);
+
+           };
+          vajax.open('GET', url, asinc);
+          vajax.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+          //vajax.setRequestHeader('Content-type', 'text/plain');
+          if(typeof(post)=='object && post!==null') vajax.send(post);
+             else vajax.send();
+
+          return true;
+      };
+
+
+     /**
+      *  Get function for inject data in site page
+      *
+      *  @param type
+      */
+
+     var getFunc = function(type)
+      {
+          var ret = false;
+          switch(type)
+           {
+               case 'js'   :   ret = function(txt)
+                                {
+                                    list[type][name] = true;
+                                    return run_js(txt);
+                                };
+                               break;
+
+               case 'css'  :   ret = function(txt)
+                                {
+                                    list[type][name] = true;
+                                    return add_css(txt);
+                                };
+                               break;
+
+               case 'html' :   ret = function(txt, css)
+                                {
+                                    list[type][name] = true;
+                                    return add_html(txt, css);
+                                };
+                               break;
+
+               default     :   throw 'Error type source';
+           };
+
+          return ret;
+      };
+
+
+     /**
+      *  Get function for inject data in site page
+      *
+      *  @param name
+      *  @param type
+      *  @param md5
+      *  @param url
+      *  @param is_store
+      *  @param asinc
+      *  @param tag
+      *
+      *  (name, type, md5, url, is_store, asinc, tag)
+      */
+
+     var getData = function(name, type, md5, url, is_store, post, asinc, tag)
+      {
+          var succ = function(str)
+           {
+               var code_md5 = parent.md5(str);
+console.log(url+': '+code_md5);
+               if(code_md5!=md5) throw 'Error load code';
+
+               var func = getFunc(type, tag);
+               func(str, tag);
+               if(is_store)
+                {
+                    var code = parent.enc(str);
+                    if(typeof(code)=='string' && code!='')
+                        localStorage.setItem(name, code);
+                };
+           };
+
+          return parent.ajax(url, succ, post, asinc);
+      };
+
+
+     /**
+      * Load data from localstorage or remote server
+      *
+      * @param obj          Object with params for inject data
       *
       * @throws
       */
 
-     this.load = function(name, md5, url, asinc)
+     this.load = function(obj)
       {
+          if(typeof(obj)!='object' || obj===null) throw 'Param isnt object';
+
           var ret = false;
-          var parent = this;
-          if(!list.hasOwnProperty(name))
+          var is_store = this.isStorage();
+
+          for(var i in obj)
            {
-               var is_store = this.isStorage();
-               if(is_store)
+               var data = obj[i];
+               var res = false;
+               if( typeof(data)=='object' && data!==null &&
+                   typeof(data['name'])!=='undefined' && typeof(data['type'])!=='undefined' &&
+                   typeof(data['md5'])!=='undefined' && typeof(data['url'])!=='undefined'
+                 )
                 {
-                    try
+                    var type = data['type'];
+                    if(type!='js' && type!='css' && type!='html') throw 'Error type source';
+
+                    var name = data['name'];
+                    var md5 = data['md5'];
+                    var url = data['url'];
+                    var post = null;
+                    var tag = null;
+                    if(typeof(data['tag'])!=='undefined') tag = data['tag'];
+                    if(typeof(data['post'])!=='undefined') post = data['post'];
+                    var asinc = false;
+                    if(typeof(data['asinc'])!=='undefined') asinc = data['asinc'];
+
+                    if(!list.hasOwnProperty(type)) list[type] = {};
+                    if(!list[type].hasOwnProperty(name) || type=='html')
                      {
-                         var str = localStorage.getItem(name);
-                         if(str!==null)
+                         if(is_store)
                           {
-                              var code = this.dec(str);
-                              if(typeof(code)=='string' && code!='' && this.md5(code)==md5)
+                              try
                                {
-                                   ret = true;
-                                   list[name] = true;
-                                   run(code);
-                               };
-                          };
-                     } catch (e) {};
-                };
-               if(!ret && typeof(vajax)=='object' && vajax!==null && typeof(url)=='string' && url!='')
-                {
-                    asinc = typeof asinc !== 'undefined' ? asinc : false;
-                    vajax.onreadystatechange  = function()
-                     {
-                         if(vajax.readyState == 4)
-                          {
-                              if(vajax.status == 200)
-                               {
-                                   var str = vajax.responseText;
-                                   var code_md5 = parent.md5(str);
-console.log(code_md5);
-                                   if(code_md5==md5)
+                                   var str = localStorage.getItem(name);
+                                   if(str!==null && str!='')
                                     {
-                                        ret = true;
-                                        list[name] = true;
-                                        run(str);
-                                        if(is_store)
+                                        var code = parent.dec(str);
+                                        if(typeof(code)=='string' && code!='' && parent.md5(code)==md5)
                                          {
-                                             var code = parent.enc(str);
-                                             if(typeof(code)=='string' && code!='')
-                                                 localStorage.setItem(name, code);
+                                             var func = getFunc(type);
+                                             res = true;
+                                             func(code, tag);
                                          };
-                                    } else throw 'Error load code';
-                               } else throw vajax.responseText;
+                                    };
+                               } catch (e) {console.log(e);};
                           };
-                     };
-                    vajax.open('GET', url, asinc);
-                    vajax.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-                    vajax.send();
-                    ret = true;
+
+                         if(typeof(url)=='string' && url!='' && !res)
+                             res = getData(name, type, md5, url, is_store, post, asinc, tag);
+                     } else res = true;
                 };
-           } else ret = true;
+               if(!ret && res) ret = res;
+           };
           return ret;
       };
  };
