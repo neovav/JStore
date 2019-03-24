@@ -41,8 +41,7 @@ let JStore = function()
       * @return boolean
       */
 
-     this.isStorage = function()
-     {
+     this.isStorage = function(){
          let ret = false;
          try{ret = 'localStorage' in window && window['localStorage'] !== null}
          catch(err){};
@@ -56,8 +55,7 @@ let JStore = function()
       *  @param txt
       */
 
-     let run_js = function(txt)
-      {
+     let run_js = function(txt){
           let dom = document.createElement("script");
           dom.text = txt;
           dom.type="text/javascript";
@@ -71,8 +69,7 @@ let JStore = function()
       *  @param css
       */
 
-     let add_css = function(css)
-      {
+     let add_css = function(css){
           let dom = document.createElement("style");
           dom.type="text/css";
           if (dom.styleSheet) dom.styleSheet.cssText = css;
@@ -88,8 +85,7 @@ let JStore = function()
       *  @param css
       */
 
-     let add_html = function(html, css)
-      {
+     let add_html = function(html, css){
           let tag = document.querySelector(css);
           tag.innerHTML = html;
       };
@@ -104,36 +100,33 @@ let JStore = function()
       * @param asinc            Synchronous or asynchronous request
       */
 
-     this.ajax = function(url, func, post, asinc)
-      {
-          if(typeof(func)!='function') throw 'Callback functions is absent';
+     this.ajax = function(url, func, post, asinc){
+          if(typeof(func)!=='function') throw 'Callback functions is absent';
           asinc = typeof asinc !== 'undefined' ? asinc : false;
 
           let vajax = false;
 
           try{vajax = new XMLHttpRequest();}
-          catch (e)
-           {
+          catch (e){
                try {vajax = new ActiveXObject("Msxml2.XMLHTTP");}
                catch (e){vajax = new ActiveXObject("Microsoft.XMLHTTP");};
            };
 
-          if(typeof(vajax)!='object' || vajax===null)
+          if(typeof(vajax)!=='object' || vajax===null)
               throw 'Our browser is not support XMLHttpRequest';
 
-          vajax.onreadystatechange  = function()
-           {
-               if(vajax.readyState != 4) return null;
-               if(vajax.status != 200) throw vajax.responseText;
+          vajax.onreadystatechange  = function(){
+               if(vajax.readyState !== 4) return null;
+               if(vajax.status !== 200) throw vajax.responseText;
 
                let str = vajax.responseText;
                func(str);
-
            };
+
           vajax.open('GET', url, asinc);
           vajax.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
           //vajax.setRequestHeader('Content-type', 'text/plain');
-          if(typeof(post)=='object && post!==null') vajax.send(post);
+          if(typeof(post)==='object' && post!==null) vajax.send(post);
              else vajax.send();
 
           return true;
@@ -146,27 +139,22 @@ let JStore = function()
       *  @param type
       */
 
-     let getFunc = function(type)
-      {
+     let getFunc = function(type){
           let ret = false;
-          switch(type)
-           {
-               case 'js'   :   ret = function(txt)
-                                {
+          switch(type){
+               case 'js'   :   ret = function(txt){
                                     list[type][name] = true;
                                     return run_js(txt);
                                 };
                                break;
 
-               case 'css'  :   ret = function(txt)
-                                {
+               case 'css'  :   ret = function(txt){
                                     list[type][name] = true;
                                     return add_css(txt);
                                 };
                                break;
 
-               case 'html' :   ret = function(txt, css)
-                                {
+               case 'html' :   ret = function(txt, css){
                                     list[type][name] = true;
                                     return add_html(txt, css);
                                 };
@@ -182,31 +170,30 @@ let JStore = function()
      /**
       *  Get function for inject data in site page
       *
-      *  @param name
-      *  @param type
-      *  @param md5
-      *  @param url
+      *  @param name            name variable
+      *  @param type            type the data
+      *  @param md5             md5 hash the data
+      *  @param url             href of source data
       *  @param is_store
-      *  @param asinc
+      *  @param post            post data in ajax request
+      *  @param asinc           type request
       *  @param tag
       *
       *  (name, type, md5, url, is_store, asinc, tag)
       */
 
-     let getData = function(name, type, md5, url, is_store, post, asinc, tag)
-      {
-          let succ = function(str)
-           {
+     let getData = function(name, type, md5, url, is_store, post, asinc, tag){
+          let succ = function(str){
                let code_md5 = parent.md5(str);
 console.log(url+': '+code_md5);
-               if(code_md5!=md5) throw 'Error load code';
+               if(code_md5!==md5) throw 'Error load code';
 
                let func = getFunc(type, tag);
                func(str, tag);
                if(is_store)
                 {
                     let code = parent.enc(str);
-                    if(typeof(code)=='string' && code!='')
+                    if(typeof(code)==='string' && code!=='')
                         localStorage.setItem(name, code);
                 };
            };
@@ -223,24 +210,21 @@ console.log(url+': '+code_md5);
       * @throws
       */
 
-     this.load = function(obj)
-      {
-          if(typeof(obj)!='object' || obj===null) throw 'Param isnt object';
+     this.load = function(obj){
+          if(typeof(obj)!=='object' || obj===null) throw 'Param isnt object';
 
           let ret = false;
           let is_store = this.isStorage();
 
-          for(let i in obj)
-           {
+          for(let i in obj){
                let data = obj[i];
                let res = false;
-               if( typeof(data)=='object' && data!==null &&
+               if( typeof(data)==='object' && data!==null &&
                    typeof(data['name'])!=='undefined' && typeof(data['type'])!=='undefined' &&
-                   typeof(data['md5'])!=='undefined' && typeof(data['url'])!=='undefined'
-                 )
-                {
+                   typeof(data['md5'])!=='undefined' && typeof(data['url'])!=='undefined'){
+
                     let type = data['type'];
-                    if(type!='js' && type!='css' && type!='html') throw 'Error type source';
+                    if(type!=='js' && type!=='css' && type!=='html') throw 'Error type source';
 
                     let name = data['name'];
                     let md5 = data['md5'];
@@ -253,18 +237,13 @@ console.log(url+': '+code_md5);
                     if(typeof(data['asinc'])!=='undefined') asinc = data['asinc'];
 
                     if(!list.hasOwnProperty(type)) list[type] = {};
-                    if(!list[type].hasOwnProperty(name) || type=='html')
-                     {
-                         if(is_store)
-                          {
-                              try
-                               {
+                    if(!list[type].hasOwnProperty(name) || type==='html'){
+                         if(is_store){
+                              try{
                                    let str = localStorage.getItem(name);
-                                   if(str!==null && str!='')
-                                    {
+                                   if(str!==null && str!==''){
                                         let code = parent.dec(str);
-                                        if(typeof(code)=='string' && code!='' && parent.md5(code)==md5)
-                                         {
+                                        if(typeof(code)==='string' && code!=='' && parent.md5(code)===md5){
                                              let func = getFunc(type);
                                              res = true;
                                              func(code, tag);
@@ -273,7 +252,7 @@ console.log(url+': '+code_md5);
                                } catch (e) {console.log(e);};
                           };
 
-                         if(typeof(url)=='string' && url!='' && !res)
+                         if(typeof(url)==='string' && url!=='' && !res)
                              res = getData(name, type, md5, url, is_store, post, asinc, tag);
                      } else res = true;
                 };

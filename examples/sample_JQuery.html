@@ -10,8 +10,7 @@
         //try{localStorage.removeItem('js:jQuery');}catch(Err){};
         //try{localStorage.removeItem('js:jQueryUI');}catch(Err){};
 
-        let obj = [
-                    {'name':'css:Style', 'type':'css', 'md5':'e1919eb2a7400f96b825a7c3f7cb1782', 'url':'style.css'},
+        let obj = [ {'name':'css:Style', 'type':'css', 'md5':'e1919eb2a7400f96b825a7c3f7cb1782', 'url':'style.css'},
                     {'name':'css:jQuery', 'type':'css', 'md5':'bf051f24690699bc2665ef6e4d7487a7', 'url':'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css'},
                     {'name':'js:jQuery', 'type':'js', 'md5':'4f252523d4af0b478c810c2547a63e19', 'url':'https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js'},
                     {'name':'js:jQueryUI', 'type':'js', 'md5':'0a497d4661df7b82feee14332ce0bdaf', 'url':'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js'}
@@ -22,11 +21,9 @@
 
         window['jstore'].load(obj);
 
-        (function($)
-          {
+        (function($){
 console.log('Load');
-              $(document).ready(function()
-                 {
+              $(document).ready(function(){
 console.log('Ready');
                      $('#state').append('<span>The library is successfully loaded</span>');
                      $('#datepicker').datepicker({dateFormat: 'yy-mm-dd'});
